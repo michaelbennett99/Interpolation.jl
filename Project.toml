@@ -3,6 +3,9 @@ uuid = "66a324e5-faf4-4b84-b38e-ed6880edc909"
 authors = ["Michael Bennett"]
 version = "0.1.0"
 
+[deps]
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
 [compat]
 julia = "1"
 
