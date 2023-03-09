@@ -10,6 +10,9 @@ struct Linear{N, T}
 end
 
 function linear_iterpolation(x, y)
+    if ! issorted(x)
+        error("x must be sorted")
+    end
     return Linear{length(x), eltype(x)}(x, y)
 end
 
@@ -17,12 +20,10 @@ function (f::Linear)(x)
     if x < f.x_min || x > f.x_max
         error("x is out of range")
     end
-    for i in 1:length(f.x)-1
-        if x < f.x[i+1]
-            @views grad = (f.y[i+1] - f.y[i]) / (f.x[i+1] - f.x[i])
-            @views return f.y[i] + grad * (x - f.x[i])
-        end
-    end
+    lub = findfirst(f.x .> x)
+    glb = lub - 1
+    @views grad = (f.y[lub] - f.y[glb]) / (f.x[lub] - f.x[glb])
+    return f.y[glb] + grad * (x - f.x[glb])
 end
 
 end # module
