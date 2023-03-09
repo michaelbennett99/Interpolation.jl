@@ -9,7 +9,7 @@ struct Linear{N, T}
     x_max::T
 end
 
-function linear_iterpolation(x, y)
+function linear_iterpolation(x::Vector{<:Real}, y::Vector{<:Real})
     if ! issorted(x)
         error("x must be sorted")
     end
