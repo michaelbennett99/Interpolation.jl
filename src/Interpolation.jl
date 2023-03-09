@@ -2,6 +2,8 @@ module Interpolation
 
 using StaticArrays
 
+export linear_interpolation
+
 struct Linear{N, T}
     x::SVector{N, T}
     y::SVector{N, T}
