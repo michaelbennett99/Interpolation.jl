@@ -76,7 +76,12 @@ function (f::Spline)(x)
         return f.y[findfirst(f.x .== x)]
     else
         lub = findfirst(f.x .> x)
-        glb = lub - 1
+        try
+            glb = lub - 1
+        catch
+            println(x)
+            println(f.x)
+            error("x is out of range")
         @views t = (x - f.x[glb]) / (f.x[lub] - f.x[glb])
         @views a = f.k[glb] * (f.x[lub] - f.x[glb]) - (f.y[lub] - f.y[glb])
         @views b = -f.k[lub] * (f.x[lub] - f.x[glb]) + (f.y[lub] - f.y[glb])
