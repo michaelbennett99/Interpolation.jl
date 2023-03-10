@@ -69,7 +69,7 @@ function cubic_interpolation(x::Vector{<:Real}, y::Vector{<:Real})
     return Spline{n, eltype(x)}(x, y, vdp)
 end
 
-function (f::Spline)(x)
+function (f::Spline)(x::Real)
     if x < f.x[1] || x > f.x[end]
         error("x is out of range")
     elseif x ∈ f.x
