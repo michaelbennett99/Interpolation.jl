@@ -34,7 +34,7 @@ end
 struct Spline{N, T}
     x::SVector{N, T}
     y::SVector{N, T}
-    ydp::SVector{N, T}
+    k::SVector{N, T}
 end
 
 function cubic_interpolation(x::Vector{<:Real}, y::Vector{<:Real})
@@ -42,26 +42,27 @@ function cubic_interpolation(x::Vector{<:Real}, y::Vector{<:Real})
         error("x must be sorted")
     end
     n = length(x)
-    dl = zeros(n)
+    dl = zeros(n-1)
     d = zeros(n)
-    du = zeros(n)
+    du = zeros(n-1)
     r = zeros(n)
 
-    dl[1] = 0
-    dl[n] = -1
-    d[1] = 1
-    d[n] = 1
-    du[1] = -1
-    du[n] = 0
-    r[1] = 0
-    r[n] = 0
+    dl[1] = 1/(x[2] - x[1])
+    du[1] = 1/(x[2] - x[1])
+    d[1] = 2/(x[2] - x[1])
+    d[n] = 2/(x[n] - x[n-1])
+    r[1] = 3 * (y[2] - y[1]) / (x[2] - x[1])^2
+    r[n] = 3 * (y[n] - y[n-1]) / (x[n] - x[n-1])^2
 
     for i ∈ 2:n-1
-        dl[i] = (x[i] - x[i-1]) / 6
-        d[i] = (x[i+1] - x[i-1]) / 3
-        du[i] = (x[i+1] - x[i]) / 6
-        r[i] = (y[i+1] - y[i])/(x[i+1] - x[i])
-            - (y[i] - y[i-1])/(x[i] - x[i-1])
+        dx1 = x[i] - x[i-1]
+        dx2 = x[i+1] - x[i]
+        dy1 = y[i] - y[i-1]
+        dy2 = y[i+1] - y[i]
+        d[i] = 2 * (1/dx1 + 1/dx2)
+        dl[i] = 1/dx2
+        du[i] = 1/dx2
+        r[i] = 3 * (dy1/dx1^2 + dy2/dx2^2)
     end
 
     vdp = Tridiagonal(dl, d, du) \ r
@@ -76,14 +77,11 @@ function (f::Spline)(x)
     else
         lub = findfirst(f.x .> x)
         glb = lub - 1
-        @views h = f.x[lub] - f.x[glb]
-        @views a = (f.x[lub] - x) / h
-        @views b = (x - f.x[glb]) / h
-
-        @views y_hat = (
-            (a * f.y[glb] + b * f.y[lub])
-            + ((a^3 - a) * f.ydp[glb] + (b^3 - b) * f.ydp[lub]) * h^2 / 6
-        )
+        @views t = (x - f.x[glb]) / (f.x[lub] - f.x[glb])
+        @views a = f.k[glb] * (f.x[lub] - f.x[glb]) - (f.y[lub] - f.y[glb])
+        @views b = -f.k[lub] * (f.x[lub] - f.x[glb]) + (f.y[lub] - f.y[glb])
+        @views y_hat = (((1 - t) * f.y[glb]) + (t * f.y[lub])
+            + (t * (1 - t) * (a * (1 - t) + b * t)))
         return y_hat
     end
 end
