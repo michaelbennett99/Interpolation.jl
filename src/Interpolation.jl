@@ -82,6 +82,7 @@ function (f::Spline)(x)
             println(x)
             println(f.x)
             error("x is out of range")
+        end
         @views t = (x - f.x[glb]) / (f.x[lub] - f.x[glb])
         @views a = f.k[glb] * (f.x[lub] - f.x[glb]) - (f.y[lub] - f.y[glb])
         @views b = -f.k[lub] * (f.x[lub] - f.x[glb]) + (f.y[lub] - f.y[glb])
