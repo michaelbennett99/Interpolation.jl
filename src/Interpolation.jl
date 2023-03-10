@@ -2,7 +2,7 @@ module Interpolation
 
 using StaticArrays, LinearAlgebra
 
-export linear_interpolation
+export linear_interpolation, cubic_interpolation
 
 struct Linear{N, T}
     x::SVector{N, T}
